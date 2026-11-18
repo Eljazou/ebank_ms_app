@@ -1,0 +1,114 @@
+<div class="page-head">
+  <div>
+    <h1>Comptes bancaires</h1>
+    <p>{{ filtered().length }} compte(s) · total {{ filteredTotal() | currency: 'MAD' : 'symbol' : '1.0-0' }}</p>
+  </div>
+  <button class="btn btn-primary" (click)="showForm.set(!showForm())">
+    {{ showForm() ? 'Annuler' : '+ Nouveau compte' }}
+  </button>
+</div>
+
+@if (error()) { <div class="alert alert-error">{{ error() }}</div> }
+@if (success()) { <div class="alert alert-success">{{ success() }}</div> }
+
+@if (showForm()) {
+  <form class="card form" (ngSubmit)="save()">
+    <label class="field">Client
+      <select class="input" name="customerId" [(ngModel)]="form.customerId" required>
+        <option [ngValue]="null" disabled>Choisir un client</option>
+        @for (c of customers(); track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </label>
+    <label class="field">Type
+      <select class="input" name="type" [(ngModel)]="form.type">
+        <option value="CURRENT-ACCOUNT">Compte courant</option>
+        <option value="SAVING-ACCOUNT">Compte épargne</option>
+      </select>
+    </label>
+    <label class="field">Solde initial (MAD)
+      <input class="input" name="balance" type="number" min="0" [(ngModel)]="form.balance">
+    </label>
+    <button class="btn btn-primary" type="submit" [disabled]="saving() || form.customerId === null">
+      {{ saving() ? 'Création…' : 'Créer' }}
+    </button>
+  </form>
+}
+
+<div class="layout" [class.with-detail]="selected()">
+  <div class="card">
+    <div class="filters">
+      <select class="input" [ngModel]="customerFilter()" (ngModelChange)="customerFilter.set($event)">
+        <option [ngValue]="null">Tous les clients</option>
+        @for (c of customers(); track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+      <select class="input" [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
+        <option value="">Tous les types</option>
+        <option value="CURRENT-ACCOUNT">Courant</option>
+        <option value="SAVING-ACCOUNT">Épargne</option>
+      </select>
+    </div>
+
+    @if (loading()) {
+      <p class="empty">Chargement…</p>
+    } @else if (filtered().length) {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Client</th><th>Type</th><th>Créé le</th><th style="text-align:right">Solde</th></tr>
+          </thead>
+          <tbody>
+            @for (a of filtered(); track a.id) {
+              <tr class="clickable" [class.selected]="selected()?.id === a.id" (click)="open(a)">
+                <td>{{ customerName(a.customerId) }}</td>
+                <td>
+                  <span class="badge" [class.badge-current]="a.type === 'CURRENT-ACCOUNT'" [class.badge-saving]="a.type === 'SAVING-ACCOUNT'">
+                    {{ a.type === 'CURRENT-ACCOUNT' ? 'Courant' : 'Épargne' }}
+                  </span>
+                </td>
+                <td class="muted">{{ a.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="amount" style="text-align:right">{{ a.balance | currency: 'MAD' : 'symbol' : '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty">Aucun compte ne correspond aux filtres.</p>
+    }
+  </div>
+
+  @if (selected(); as acc) {
+    <aside class="card detail">
+      <div class="detail-head">
+        <h2>Détail du compte</h2>
+        <button class="btn btn-ghost" (click)="selected.set(null)" aria-label="Fermer">✕</button>
+      </div>
+
+      <p class="detail-balance">{{ acc.balance | currency: 'MAD' : 'symbol' : '1.2-2' }}</p>
+      <span class="badge" [class.badge-current]="acc.type === 'CURRENT-ACCOUNT'" [class.badge-saving]="acc.type === 'SAVING-ACCOUNT'">
+        {{ acc.type === 'CURRENT-ACCOUNT' ? 'Compte courant' : 'Compte épargne' }}
+      </span>
+
+      <dl>
+        <dt>Identifiant</dt><dd class="mono">{{ acc.id }}</dd>
+        <dt>Créé le</dt><dd>{{ acc.createdAt | date: 'dd/MM/yyyy à HH:mm' }}</dd>
+        <dt>Titulaire</dt>
+        <dd>
+          @if (detailLoading()) {
+            <span class="muted">Chargement…</span>
+          } @else if (acc.customer) {
+            <strong>{{ acc.customer.name }}</strong><br>
+            <span class="muted">{{ acc.customer.email }}</span>
+          } @else {
+            {{ customerName(acc.customerId) }}
+          }
+        </dd>
+      </dl>
+      <p class="hint">Le titulaire est récupéré par ebank-service via Feign (customer-service).</p>
+    </aside>
+  }
+</div>

@@ -1,0 +1,68 @@
+<div class="page-head">
+  <div>
+    <h1>Tableau de bord</h1>
+    <p>Vue d'ensemble de la banque</p>
+  </div>
+  <a routerLink="/chat" class="btn btn-primary">✦ Demander à l'assistant</a>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+}
+
+<div class="stats">
+  <div class="card stat">
+    <span class="stat-label">Clients</span>
+    <span class="stat-value">{{ loading() ? '…' : customers().length }}</span>
+  </div>
+  <div class="card stat">
+    <span class="stat-label">Comptes</span>
+    <span class="stat-value">{{ loading() ? '…' : accounts().length }}</span>
+  </div>
+  <div class="card stat highlight">
+    <span class="stat-label">Solde total</span>
+    <span class="stat-value">{{ loading() ? '…' : (totalBalance() | currency: 'MAD' : 'symbol' : '1.0-0') }}</span>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Derniers comptes créés</h2>
+    @if (latest().length) {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Client</th><th>Type</th><th>Créé le</th><th style="text-align:right">Solde</th></tr>
+          </thead>
+          <tbody>
+            @for (a of latest(); track a.id) {
+              <tr>
+                <td>{{ customerName(a.customerId) }}</td>
+                <td>
+                  <span class="badge" [class.badge-current]="a.type === 'CURRENT-ACCOUNT'" [class.badge-saving]="a.type === 'SAVING-ACCOUNT'">
+                    {{ a.type === 'CURRENT-ACCOUNT' ? 'Courant' : 'Épargne' }}
+                  </span>
+                </td>
+                <td class="muted">{{ a.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td class="amount" style="text-align:right">{{ a.balance | currency: 'MAD' : 'symbol' : '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else if (!loading()) {
+      <p class="empty">Aucun compte pour le moment.</p>
+    }
+  </div>
+
+  <div class="card">
+    <h2>Répartition des comptes</h2>
+    <div class="split-bar">
+      <div class="split-current" [style.width.%]="currentPercent()"></div>
+    </div>
+    <ul class="legend">
+      <li><span class="dot dot-current"></span> Courant <strong>{{ currentCount() }}</strong></li>
+      <li><span class="dot dot-saving"></span> Épargne <strong>{{ savingCount() }}</strong></li>
+    </ul>
+  </div>
+</div>

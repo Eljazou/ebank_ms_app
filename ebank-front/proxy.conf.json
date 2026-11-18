@@ -1,0 +1,20 @@
+{
+  "/api/customers": {
+    "target": "http://localhost:9999",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api": "/CUSTOMER-SERVICE" }
+  },
+  "/api/bankaccounts": {
+    "target": "http://localhost:9999",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api": "/EBANK-SERVICE" }
+  },
+  "/api/chat": {
+    "target": "http://localhost:8058",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/api": "" }
+  }
+}

@@ -1,0 +1,54 @@
+<div class="page-head">
+  <div>
+    <h1>Clients</h1>
+    <p>{{ customers().length }} client(s) enregistré(s)</p>
+  </div>
+  <button class="btn btn-primary" (click)="showForm.set(!showForm())">
+    {{ showForm() ? 'Annuler' : '+ Nouveau client' }}
+  </button>
+</div>
+
+@if (error()) { <div class="alert alert-error">{{ error() }}</div> }
+@if (success()) { <div class="alert alert-success">{{ success() }}</div> }
+
+@if (showForm()) {
+  <form class="card form" (ngSubmit)="save()">
+    <label class="field">Nom
+      <input class="input" name="name" [(ngModel)]="newName" placeholder="ex. Sara" required>
+    </label>
+    <label class="field">Email
+      <input class="input" name="email" type="email" [(ngModel)]="newEmail" placeholder="sara@gmail.com" required>
+    </label>
+    <button class="btn btn-primary" type="submit" [disabled]="saving() || !newName.trim() || !newEmail.trim()">
+      {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+    </button>
+  </form>
+}
+
+<div class="card">
+  <input class="input search" placeholder="Rechercher par nom ou email…"
+         [ngModel]="search()" (ngModelChange)="search.set($event)">
+
+  @if (loading()) {
+    <p class="empty">Chargement…</p>
+  } @else if (filtered().length) {
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Client</th><th>Email</th><th>ID</th></tr></thead>
+        <tbody>
+          @for (c of filtered(); track c.id) {
+            <tr>
+              <td>
+                <div class="who"><span class="avatar">{{ initial(c.name) }}</span> <strong>{{ c.name }}</strong></div>
+              </td>
+              <td class="muted">{{ c.email }}</td>
+              <td class="mono">#{{ c.id }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="empty">Aucun client trouvé.</p>
+  }
+</div>

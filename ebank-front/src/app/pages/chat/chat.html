@@ -1,0 +1,36 @@
+<div class="page-head">
+  <div>
+    <h1>Assistant IA</h1>
+    <p>Le bot utilise les outils MCP de customer-service et ebank-service</p>
+  </div>
+</div>
+
+<div class="card chat">
+  <div class="messages" #scroller>
+    @for (m of messages(); track $index) {
+      <div class="msg" [class.user]="m.from === 'user'">
+        @if (m.from === 'bot') { <span class="bot-icon">✦</span> }
+        <div class="bubble">{{ m.text }}</div>
+      </div>
+    }
+    @if (thinking()) {
+      <div class="msg">
+        <span class="bot-icon">✦</span>
+        <div class="bubble typing"><span></span><span></span><span></span></div>
+      </div>
+    }
+  </div>
+
+  @if (messages().length === 1) {
+    <div class="suggestions">
+      @for (s of suggestions; track s) {
+        <button class="chip" (click)="send(s)">{{ s }}</button>
+      }
+    </div>
+  }
+
+  <form class="composer" (ngSubmit)="send()">
+    <input class="input" name="question" [(ngModel)]="question" placeholder="Écrivez votre question…" autocomplete="off">
+    <button class="btn btn-primary" type="submit" [disabled]="thinking() || !question.trim()">Envoyer</button>
+  </form>
+</div>
