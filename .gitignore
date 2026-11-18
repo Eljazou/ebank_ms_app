@@ -34,3 +34,6 @@ build/
 
 ### Docs locales ###
 app_review.md
+
+### Local secrets ###
+**/secrets.properties
