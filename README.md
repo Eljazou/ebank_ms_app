@@ -90,6 +90,28 @@ The sidebar also has shortcuts to the Discord channel and the Telegram bot.
 
 ---
 
+## Chat with the bank from Discord and Telegram
+
+The same AI agent also runs as a **Discord bot** and a **Telegram bot**, inside `ebank-bot`. Each bot passes the user's message to `EbankAiAgent`, which calls the MCP tools and sends back the answer. Every Discord user and every Telegram chat gets its own conversation memory.
+
+### Discord
+
+`DiscordBot` (package `discord`) uses `spring-boot-starter-discord` (JDA). It listens to every message in the server, ignores messages from bots, and replies in the same channel. The bot needs its token (`discord.token`) and the **Message Content Intent**, enabled both in the Discord Developer Portal and with `discord.gateway-intents=MESSAGE_CONTENT`.
+
+Here the bot answers "donne moi la liste des clients" with the 3 customers it got from `customer_service`:
+
+![Discord bot](docs/screenshots/discord-bot.png)
+
+### Telegram
+
+`TelegramBot` (package `telegram`) uses `telegrambots-springboot-longpolling-starter`. The bot was created with BotFather, and its token is read from `Telegram_Token`. If the token is missing, the Telegram bot simply doesn't start and the rest of the app keeps working.
+
+Here the bot lists the customers, then all 18 bank accounts it got from `ebank_service`:
+
+![Telegram bot](docs/screenshots/telegram-bot.png)
+
+---
+
 ## Run it locally
 
 ### 1. Secrets
